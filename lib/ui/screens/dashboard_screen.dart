@@ -1,9 +1,9 @@
+import 'package:finance_expense_app/ui/widgets/balance_card.dart';
+import 'package:finance_expense_app/ui/widgets/expense_chart.dart';
+import 'package:finance_expense_app/ui/widgets/transaction_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../providers/transaction_provider.dart';
-import '../../widgets/balance_card.dart';
-import '../../widgets/expense_chart.dart';
-import '../../widgets/transaction_tile.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -30,6 +30,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
       appBar: AppBar(
         title: const Text('Smart Finance 💰'),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              Navigator.pushNamed(context, '/settings');
+            },
+          ),
+        ],
       ),
       body: RefreshIndicator(
         onRefresh: () => provider.fetchTransactions(),
@@ -47,12 +55,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
             const SizedBox(height: 8),
             if (transactions.isEmpty)
               const Center(
-                  child: Padding(
-                padding: EdgeInsets.all(24),
-                child: Text('No transactions yet. Add one to get started!'),
-              ))
+                child: Padding(
+                  padding: EdgeInsets.all(24),
+                  child: Text('No transactions yet. Add one to get started!'),
+                ),
+              )
             else
-              ...transactions.take(5).map((tx) => TransactionTile(transaction: tx)),
+              ...transactions
+                  .take(5)
+                  .map((tx) => TransactionTile(transaction: tx)),
           ],
         ),
       ),

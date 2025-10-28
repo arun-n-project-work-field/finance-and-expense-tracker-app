@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:csv/csv.dart';
 import '../data/db/database_helper.dart';
@@ -12,7 +13,7 @@ class TransactionProvider extends ChangeNotifier {
   List<TransactionModel> get transactions => _transactions;
 
   Future<void> exportToCsv() async {
-    final dbClient = await db.database;
+    final dbClient = await dbHelper.database; // ✅ fixed variable name
     final transactions = await dbClient.query('transactions');
 
     List<List<dynamic>> rows = [
@@ -69,5 +70,19 @@ class TransactionProvider extends ChangeNotifier {
         .where((t) => !t.isIncome)
         .fold(0, (sum, t) => sum + t.amount);
     return income - expense;
+  }
+
+  Map<String, double> expensesByCategory({
+    required int year,
+    required int month,
+  }) {
+    final Map<String, double> categoryTotals = {};
+    for (var t in _transactions) {
+      if (!t.isIncome && t.date.year == year && t.date.month == month) {
+        categoryTotals[t.category] =
+            (categoryTotals[t.category] ?? 0) + t.amount;
+      }
+    }
+    return categoryTotals;
   }
 }

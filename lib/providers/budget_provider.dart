@@ -11,7 +11,7 @@ class BudgetProvider with ChangeNotifier {
   String get currentMonthKey => _currentMonthKey;
 
   static String _generateMonthKey(DateTime d) =>
-      '${d.year.toString().padLeft(4,'0')}-${d.month.toString().padLeft(2,'0')}';
+      '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}';
 
   Future<void> loadBudgetsForMonth([String? monthKey]) async {
     _currentMonthKey = monthKey ?? _currentMonthKey;
@@ -22,8 +22,7 @@ class BudgetProvider with ChangeNotifier {
       whereArgs: [_currentMonthKey],
       orderBy: 'category ASC',
     );
-    _budgets =
-        maps.map((e) => CategoryBudget.fromMap(e)).toList();
+    _budgets = maps.map((e) => CategoryBudget.fromMap(e)).toList();
     notifyListeners();
   }
 
@@ -32,8 +31,12 @@ class BudgetProvider with ChangeNotifier {
     if (b.id == null) {
       await dbClient.insert('budgets', b.toMap());
     } else {
-      await dbClient.update('budgets', b.toMap(),
-          where: 'id = ?', whereArgs: [b.id]);
+      await dbClient.update(
+        'budgets',
+        b.toMap(),
+        where: 'id = ?',
+        whereArgs: [b.id],
+      );
     }
     await loadBudgetsForMonth(_currentMonthKey);
   }

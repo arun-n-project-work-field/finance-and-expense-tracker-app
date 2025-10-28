@@ -1,7 +1,7 @@
+import 'package:finance_expense_app/ui/widgets/transaction_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../providers/transaction_provider.dart';
-import '../../widgets/transaction_tile.dart';
 import 'add_edit_transaction_screen.dart';
 
 class TransactionsScreen extends StatefulWidget {
