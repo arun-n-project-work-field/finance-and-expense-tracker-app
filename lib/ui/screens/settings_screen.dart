@@ -1,3 +1,4 @@
+import 'package:finance_expense_app/providers/transaction_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/theme_provider.dart';
@@ -24,6 +25,16 @@ class SettingsScreen extends StatelessWidget {
             leading: const Icon(Icons.info_outline),
             title: const Text('App Version'),
             subtitle: const Text('1.0.0'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.file_download),
+            title: const Text('Export Transactions to CSV'),
+            onTap: () async {
+              await Provider.of<TransactionProvider>(
+                context,
+                listen: false,
+              ).exportToCsv();
+            },
           ),
         ],
       ),
