@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/transaction_provider.dart';
 import 'ui/screens/dashboard_screen.dart';
+import 'ui/screens/transactions_screen.dart';
+import 'ui/screens/add_edit_transaction_screen.dart';
 import 'core/theme.dart';
 
 void main() {
@@ -21,11 +23,15 @@ class SmartFinanceApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Smart Personal Finance and Expense Tracker App',
+      title: 'Smart Finance',
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
-      home: const DashboardScreen(),
+      routes: {
+        '/': (_) => const DashboardScreen(),
+        '/transactions': (_) => const TransactionsScreen(),
+        '/addTransaction': (_) => const AddEditTransactionScreen(),
+      },
     );
   }
 }
