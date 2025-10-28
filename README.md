@@ -178,7 +178,7 @@ feat: add CSV export & share functionality
 
 ## 🧑‍💻 Author
 **Your Name**  
-GitHub: [@yourusername](https://github.com/arun_n_project_work_field)
+GitHub: [@yourusername](https://github.com/arun-n-project-work-field)
 
 ---
 
