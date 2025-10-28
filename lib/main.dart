@@ -1,3 +1,4 @@
+import 'package:finance_expense_app/providers/theme_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/transaction_provider.dart';
@@ -22,16 +23,22 @@ class SmartFinanceApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeProv = Provider.of<ThemeProvider>(context);
     return MaterialApp(
-      title: 'Smart Finance',
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
-      routes: {
-        '/': (_) => const DashboardScreen(),
-        '/transactions': (_) => const TransactionsScreen(),
-        '/addTransaction': (_) => const AddEditTransactionScreen(),
-      },
+      title: 'Smart Finance Tracker',
+      debugShowCheckedModeBanner: false,
+      themeMode: themeProv.isDark ? ThemeMode.dark : ThemeMode.light,
+      theme: ThemeData(
+        colorSchemeSeed: Colors.indigo,
+        useMaterial3: true,
+        brightness: Brightness.light,
+      ),
+      darkTheme: ThemeData(
+        colorSchemeSeed: Colors.teal,
+        useMaterial3: true,
+        brightness: Brightness.dark,
+      ),
+      home: const DashboardScreen(),
     );
   }
 }
