@@ -36,8 +36,9 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen> {
     super.initState();
     final tx = widget.existingTransaction;
     _titleController = TextEditingController(text: tx?.title ?? '');
-    _amountController =
-        TextEditingController(text: tx?.amount.toString() ?? '');
+    _amountController = TextEditingController(
+      text: tx?.amount.toString() ?? '',
+    );
     _selectedCategory = tx?.category ?? 'Food';
     _isIncome = tx?.isIncome ?? false;
     _selectedDate = tx?.date ?? DateTime.now();
@@ -67,8 +68,7 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen> {
     if (widget.existingTransaction == null) {
       await provider.addTransaction(transaction);
     } else {
-      await provider.deleteTransaction(widget.existingTransaction!.id!);
-      await provider.addTransaction(transaction);
+      await provider.updateTransaction(transaction);
     }
 
     if (mounted) Navigator.pop(context);
@@ -78,8 +78,11 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title:
-            Text(widget.existingTransaction == null ? 'Add Transaction' : 'Edit Transaction'),
+        title: Text(
+          widget.existingTransaction == null
+              ? 'Add Transaction'
+              : 'Edit Transaction',
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -93,8 +96,8 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen> {
                   labelText: 'Title',
                   prefixIcon: Icon(Icons.title),
                 ),
-                validator: (value) =>
-                    value!.isEmpty ? 'Please enter a title' : null,
+                validator:
+                    (value) => value!.isEmpty ? 'Please enter a title' : null,
               ),
               const SizedBox(height: 12),
               TextFormField(
@@ -113,10 +116,13 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen> {
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
                 value: _selectedCategory,
-                items: _categories
-                    .map((cat) =>
-                        DropdownMenuItem(value: cat, child: Text(cat)))
-                    .toList(),
+                items:
+                    _categories
+                        .map(
+                          (cat) =>
+                              DropdownMenuItem(value: cat, child: Text(cat)),
+                        )
+                        .toList(),
                 onChanged: (val) => setState(() => _selectedCategory = val!),
                 decoration: const InputDecoration(
                   labelText: 'Category',
@@ -131,7 +137,9 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen> {
               ),
               const SizedBox(height: 12),
               ListTile(
-                title: Text('Date: ${DateFormat.yMMMd().format(_selectedDate)}'),
+                title: Text(
+                  'Date: ${DateFormat.yMMMd().format(_selectedDate)}',
+                ),
                 trailing: const Icon(Icons.calendar_today),
                 onTap: () async {
                   final picked = await showDatePicker(

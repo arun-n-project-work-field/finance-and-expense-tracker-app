@@ -4,7 +4,12 @@ class CategoryBudget {
   final double budgetAmount;
   final String monthKey; // format YYYY-MM
 
-  CategoryBudget({this.id, required this.category, required this.budgetAmount, required this.monthKey});
+  CategoryBudget({
+    this.id,
+    required this.category,
+    required this.budgetAmount,
+    required this.monthKey,
+  });
 
   Map<String, dynamic> toMap() {
     return {

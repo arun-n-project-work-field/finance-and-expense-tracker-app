@@ -26,16 +26,16 @@ class SettingsScreen extends StatelessWidget {
             title: const Text('App Version'),
             subtitle: const Text('1.0.0'),
           ),
-          ListTile(
-            leading: const Icon(Icons.file_download),
-            title: const Text('Export Transactions to CSV'),
-            onTap: () async {
-              await Provider.of<TransactionProvider>(
-                context,
-                listen: false,
-              ).exportToCsv();
-            },
-          ),
+          // ListTile(
+          //   leading: const Icon(Icons.file_download),
+          //   title: const Text('Export Transactions to CSV'),
+          //   onTap: () async {
+          //     await Provider.of<TransactionProvider>(
+          //       context,
+          //       listen: false,
+          //     ).exportToCsv();
+          //   },
+          // ),
         ],
       ),
     );

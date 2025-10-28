@@ -1,47 +1,103 @@
+// import 'dart:io';
+// import 'package:flutter/foundation.dart';
+// import 'package:csv/csv.dart';
+// import '../data/db/database_helper.dart';
+// import '../data/models/transaction_model.dart';
+// import 'package:share_plus/share_plus.dart';
+// import 'package:path_provider/path_provider.dart';
+
+// class TransactionProvider extends ChangeNotifier {
+//   final dbHelper = DatabaseHelper.instance;
+//   List<TransactionModel> _transactions = [];
+
+//   List<TransactionModel> get transactions => _transactions;
+
+//   Future<void> exportToCsv() async {
+//     final dbClient = await dbHelper.database; // ✅ fixed variable name
+//     final transactions = await dbClient.query('transactions');
+
+//     List<List<dynamic>> rows = [
+//       ['ID', 'Title', 'Amount', 'Category', 'Date', 'Type'],
+//     ];
+
+//     for (var t in transactions) {
+//       rows.add([
+//         t['id'],
+//         t['title'],
+//         t['amount'],
+//         t['category'],
+//         t['date'],
+//         t['type'],
+//       ]);
+//     }
+
+//     String csvData = const ListToCsvConverter().convert(rows);
+
+//     final directory = await getApplicationDocumentsDirectory();
+//     final path = '${directory.path}/transactions.csv';
+//     final file = File(path);
+//     await file.writeAsString(csvData);
+
+//     await Share.shareXFiles([
+//       XFile(path),
+//     ], text: 'My Finance Tracker CSV Export');
+//   }
+
+//   Future<void> fetchTransactions() async {
+//     final db = await dbHelper.database;
+//     final maps = await db.query('transactions', orderBy: 'date DESC');
+//     _transactions = maps.map((e) => TransactionModel.fromMap(e)).toList();
+//     notifyListeners();
+//   }
+
+//   Future<void> addTransaction(TransactionModel transaction) async {
+//     final db = await dbHelper.database;
+//     await db.insert('transactions', transaction.toMap());
+//     await fetchTransactions();
+//   }
+
+//   Future<void> deleteTransaction(int id) async {
+//     final db = await dbHelper.database;
+//     await db.delete('transactions', where: 'id = ?', whereArgs: [id]);
+//     await fetchTransactions();
+//   }
+
+//   double get totalBalance {
+//     double income = _transactions
+//         .where((t) => t.isIncome)
+//         .fold(0, (sum, t) => sum + t.amount);
+//     double expense = _transactions
+//         .where((t) => !t.isIncome)
+//         .fold(0, (sum, t) => sum + t.amount);
+//     return income - expense;
+//   }
+
+//   Map<String, double> expensesByCategory({
+//     required int year,
+//     required int month,
+//   }) {
+//     final Map<String, double> categoryTotals = {};
+//     for (var t in _transactions) {
+//       if (!t.isIncome && t.date.year == year && t.date.month == month) {
+//         categoryTotals[t.category] =
+//             (categoryTotals[t.category] ?? 0) + t.amount;
+//       }
+//     }
+//     return categoryTotals;
+//   }
+// }
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:csv/csv.dart';
+import 'package:path_provider/path_provider.dart';
 import '../data/db/database_helper.dart';
 import '../data/models/transaction_model.dart';
-import 'package:share_plus/share_plus.dart';
-import 'package:path_provider/path_provider.dart';
 
 class TransactionProvider extends ChangeNotifier {
   final dbHelper = DatabaseHelper.instance;
   List<TransactionModel> _transactions = [];
 
   List<TransactionModel> get transactions => _transactions;
-
-  Future<void> exportToCsv() async {
-    final dbClient = await dbHelper.database; // ✅ fixed variable name
-    final transactions = await dbClient.query('transactions');
-
-    List<List<dynamic>> rows = [
-      ['ID', 'Title', 'Amount', 'Category', 'Date', 'Type'],
-    ];
-
-    for (var t in transactions) {
-      rows.add([
-        t['id'],
-        t['title'],
-        t['amount'],
-        t['category'],
-        t['date'],
-        t['type'],
-      ]);
-    }
-
-    String csvData = const ListToCsvConverter().convert(rows);
-
-    final directory = await getApplicationDocumentsDirectory();
-    final path = '${directory.path}/transactions.csv';
-    final file = File(path);
-    await file.writeAsString(csvData);
-
-    await Share.shareXFiles([
-      XFile(path),
-    ], text: 'My Finance Tracker CSV Export');
-  }
 
   Future<void> fetchTransactions() async {
     final db = await dbHelper.database;
@@ -53,6 +109,17 @@ class TransactionProvider extends ChangeNotifier {
   Future<void> addTransaction(TransactionModel transaction) async {
     final db = await dbHelper.database;
     await db.insert('transactions', transaction.toMap());
+    await fetchTransactions();
+  }
+
+  Future<void> updateTransaction(TransactionModel transaction) async {
+    final db = await dbHelper.database;
+    await db.update(
+      'transactions',
+      transaction.toMap(),
+      where: 'id = ?',
+      whereArgs: [transaction.id],
+    );
     await fetchTransactions();
   }
 
@@ -84,5 +151,41 @@ class TransactionProvider extends ChangeNotifier {
       }
     }
     return categoryTotals;
+  }
+
+  Future<String> saveToCsvLocally() async {
+    final db = await dbHelper.database;
+    final transactions = await db.query('transactions');
+
+    List<List<dynamic>> rows = [
+      ['ID', 'Title', 'Amount', 'Category', 'Date', 'Type'],
+    ];
+
+    for (var t in transactions) {
+      rows.add([
+        t['id'],
+        t['title'],
+        t['amount'],
+        t['category'],
+        t['date'],
+        t['type'],
+      ]);
+    }
+
+    String csvData = const ListToCsvConverter().convert(rows);
+
+    Directory? directory;
+    if (Platform.isAndroid) {
+      directory = Directory('/storage/emulated/0/Download');
+    } else {
+      directory = await getApplicationDocumentsDirectory();
+    }
+
+    final path =
+        '${directory.path}/transactions_${DateTime.now().millisecondsSinceEpoch}.csv';
+    final file = File(path);
+    await file.writeAsString(csvData);
+
+    return path;
   }
 }

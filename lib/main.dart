@@ -1,16 +1,10 @@
 import 'package:finance_expense_app/ui/screens/add_edit_transaction_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
-// Providers
 import 'providers/theme_provider.dart';
 import 'providers/transaction_provider.dart';
 import 'providers/budget_provider.dart';
-
-// Screens
 import 'ui/screens/dashboard_screen.dart';
-
 import 'ui/screens/budgets_screen.dart';
 import 'ui/screens/settings_screen.dart';
 

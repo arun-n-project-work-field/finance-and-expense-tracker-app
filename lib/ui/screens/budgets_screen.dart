@@ -69,7 +69,6 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
     final txProv = Provider.of<TransactionProvider>(context);
     final budgets = bProv.budgets;
 
-    // ✅ Safe check — handle missing function
     final Map<String, double> spentByCategory =
         txProv.expensesByCategory != null
             ? txProv.expensesByCategory(
@@ -79,86 +78,120 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
             : {};
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Budgets'), centerTitle: true),
+      appBar: AppBar(
+        title: const Text('Budgets'),
+        centerTitle: true,
+        elevation: 2,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
             // Month selector
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Month: ${bProv.currentMonthKey}',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                IconButton(
-                  icon: const Icon(Icons.calendar_month),
-                  onPressed: () => _selectMonth(context),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-
-            // Form for new budget
-            Form(
-              key: _formKey,
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceVariant,
+                borderRadius: BorderRadius.circular(14),
+              ),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Expanded(
-                    flex: 2,
-                    child: DropdownButtonFormField<String>(
-                      value: _selectedCategory,
-                      items:
-                          _categories
-                              .map(
-                                (c) =>
-                                    DropdownMenuItem(value: c, child: Text(c)),
-                              )
-                              .toList(),
-                      onChanged: (v) => setState(() => _selectedCategory = v!),
-                      decoration: const InputDecoration(labelText: 'Category'),
-                    ),
+                  Text(
+                    'Month: ${bProv.currentMonthKey}',
+                    style: Theme.of(context).textTheme.titleMedium,
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    flex: 2,
-                    child: TextFormField(
-                      controller: _budgetController,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      decoration: const InputDecoration(
-                        labelText: 'Budget Amount',
-                      ),
-                      validator:
-                          (v) => v == null || v.isEmpty ? 'Enter amount' : null,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  ElevatedButton.icon(
-                    onPressed: () async {
-                      if (!_formKey.currentState!.validate()) return;
-                      final val = double.tryParse(_budgetController.text)!;
-                      await bProv.upsertBudget(
-                        CategoryBudget(
-                          category: _selectedCategory,
-                          budgetAmount: val,
-                          monthKey: bProv.currentMonthKey,
-                        ),
-                      );
-                      _budgetController.clear();
-                    },
-                    icon: const Icon(Icons.check),
-                    label: const Text('Set'),
+                  IconButton(
+                    icon: const Icon(Icons.calendar_month_rounded),
+                    onPressed: () => _selectMonth(context),
                   ),
                 ],
               ),
             ),
+            const SizedBox(height: 16),
 
-            const SizedBox(height: 20),
+            // New polished input area
+            Card(
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      DropdownButtonFormField<String>(
+                        value: _selectedCategory,
+                        items:
+                            _categories
+                                .map(
+                                  (c) => DropdownMenuItem(
+                                    value: c,
+                                    child: Text(c),
+                                  ),
+                                )
+                                .toList(),
+                        onChanged:
+                            (v) => setState(() => _selectedCategory = v!),
+                        decoration: const InputDecoration(
+                          labelText: 'Category',
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.category),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        controller: _budgetController,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        decoration: const InputDecoration(
+                          labelText: 'Budget Amount',
+                          prefixIcon: Icon(Icons.currency_rupee),
+                          border: OutlineInputBorder(),
+                        ),
+                        validator:
+                            (v) =>
+                                v == null || v.isEmpty ? 'Enter amount' : null,
+                      ),
+                      const SizedBox(height: 14),
+                      ElevatedButton.icon(
+                        onPressed: () async {
+                          if (!_formKey.currentState!.validate()) return;
+                          final val = double.tryParse(_budgetController.text)!;
+                          await bProv.upsertBudget(
+                            CategoryBudget(
+                              category: _selectedCategory,
+                              budgetAmount: val,
+                              monthKey: bProv.currentMonthKey,
+                            ),
+                          );
+                          _budgetController.clear();
+                        },
+                        icon: const Icon(Icons.check_circle_outline),
+                        label: const Text(
+                          'Set Budget',
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
 
-            // Budgets list
+            const SizedBox(height: 24),
+
+            // Budget list
             Expanded(
               child:
                   budgets.isEmpty
@@ -170,7 +203,7 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
                       )
                       : ListView.separated(
                         itemCount: budgets.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 10),
+                        separatorBuilder: (_, __) => const SizedBox(height: 14),
                         itemBuilder: (_, idx) {
                           final b = budgets[idx];
                           final spent = spentByCategory[b.category] ?? 0.0;
@@ -187,59 +220,73 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
                           }
 
                           return AnimatedContainer(
-                            duration: const Duration(milliseconds: 300),
+                            duration: const Duration(milliseconds: 400),
                             curve: Curves.easeInOut,
                             decoration: BoxDecoration(
                               color: Theme.of(
                                 context,
-                              ).colorScheme.surfaceVariant.withOpacity(0.3),
-                              borderRadius: BorderRadius.circular(12),
+                              ).colorScheme.surfaceVariant.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black12,
+                                  blurRadius: 6,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ],
                             ),
                             child: Padding(
-                              padding: const EdgeInsets.all(12),
+                              padding: const EdgeInsets.all(14),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
                                     b.category,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleMedium!
-                                        .copyWith(fontWeight: FontWeight.w600),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  LinearProgressIndicator(
-                                    value: percent.clamp(0.0, 1.0).toDouble(),
-                                    color: color,
-                                    backgroundColor: color.withOpacity(0.3),
-                                    minHeight: 8,
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.titleMedium!.copyWith(
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 18,
+                                    ),
                                   ),
                                   const SizedBox(height: 6),
+                                  Text(
+                                    '₹${spent.toStringAsFixed(2)} / ₹${b.budgetAmount.toStringAsFixed(2)}',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color:
+                                          Theme.of(
+                                            context,
+                                          ).colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: LinearProgressIndicator(
+                                      value: percent.clamp(0.0, 1.0).toDouble(),
+                                      color: color,
+                                      backgroundColor: color.withOpacity(0.3),
+                                      minHeight: 8,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
                                   Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
-                                        '₹${spent.toStringAsFixed(2)} / ₹${b.budgetAmount.toStringAsFixed(2)}',
-                                        style: const TextStyle(fontSize: 13),
+                                        '${(percent * 100).toStringAsFixed(0)}% used',
+                                        style: TextStyle(
+                                          color: color,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
-                                      Row(
-                                        children: [
-                                          Text(
-                                            '${(percent * 100).toStringAsFixed(0)}%',
-                                            style: TextStyle(
-                                              color: color,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          IconButton(
-                                            icon: const Icon(
-                                              Icons.delete_outline,
-                                            ),
-                                            onPressed:
-                                                () => bProv.deleteBudget(b.id!),
-                                          ),
-                                        ],
+                                      IconButton(
+                                        icon: const Icon(Icons.delete_outline),
+                                        color: Colors.redAccent,
+                                        onPressed:
+                                            () => bProv.deleteBudget(b.id!),
                                       ),
                                     ],
                                   ),
